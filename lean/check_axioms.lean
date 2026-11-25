@@ -1,0 +1,32 @@
+import DualSmaleMultiscale
+
+#print axioms DualSmaleMultiscale.radial_lift_obstruction
+#print axioms DualSmaleMultiscale.radial_lift_critical_value_ge
+#print axioms DualSmaleMultiscale.radial_lift_confined_critical_value_ge
+
+#print axioms DualSmaleMultiscale.exact_radial_integral_critical_value
+#print axioms DualSmaleMultiscale.exact_harmonic_critical_value
+#print axioms DualSmaleMultiscale.exact_rmin_div_n_critical_value
+#print axioms DualSmaleMultiscale.exact_harmonic_mean_half
+#print axioms DualSmaleMultiscale.exact_bounded_spread_dual_smale
+#print axioms DualSmaleMultiscale.exact_closest_crit_dichotomy
+#print axioms DualSmaleMultiscale.exact_equal_modulus_dual_smale
+#print axioms DualSmaleMultiscale.equal_modulus_quantitative_stability
+#print axioms DualSmaleMultiscale.equal_modulus_strict_uniqueness
+
+#print axioms DualSmaleMultiscale.circle_lower_bound_of_cluster_gap
+#print axioms DualSmaleMultiscale.multiscale_inner_cluster_confinement
+#print axioms DualSmaleMultiscale.multiscale_exact_dual_smale_cluster
+
+#print axioms DualSmaleMultiscale.harmonic_sum_dual_smale_one
+#print axioms DualSmaleMultiscale.harmonic_sum_dual_smale_seven_quarters
+#print axioms DualSmaleMultiscale.chebyshev_squared_dual_smale
+
+#print axioms DualSmaleMultiscale.wallSum_ne_zero_of_re_nonneg
+#print axioms DualSmaleMultiscale.RnPoly_one_sub_ne_zero_le_9
+#print axioms DualSmaleMultiscale.closest_crit_nonvanishing_le_9
+#print axioms DualSmaleMultiscale.closest_crit_vanishing_witness_10
+
+#print axioms DualSmaleMultiscale.rodrigues_eq_jacobi01
+#print axioms DualSmaleMultiscale.jacobi01_orthogonality
+#print axioms DualSmaleMultiscale.jacobi_univalent_obstruction

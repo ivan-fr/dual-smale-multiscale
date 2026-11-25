@@ -1,0 +1,552 @@
+\documentclass[11pt,a4paper]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{amsmath,amssymb,amsthm,mathtools}
+\usepackage{array}
+\usepackage{booktabs}
+\usepackage{geometry}
+\usepackage{hyperref}
+\usepackage{microtype}
+
+\geometry{margin=2.5cm}
+
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{conjecture}[theorem]{Conjecture}
+\theoremstyle{definition}
+\newtheorem{definition}[theorem]{Definition}
+\theoremstyle{remark}
+\newtheorem{remark}[theorem]{Remark}
+
+\newcommand{\CC}{\mathbb{C}}
+\newcommand{\RR}{\mathbb{R}}
+\newcommand{\NN}{\mathbb{N}}
+\newcommand{\DD}{\mathbb{D}}
+\DeclareMathOperator{\RePart}{Re}
+\DeclareMathOperator{\ImPart}{Im}
+
+\title{Exact Radial-Lift Stability, Multi-Scale Cluster Confinement,\\
+and the Non-Vanishing Threshold for the Dual Smale Mean Value Conjecture\\
+with Complete Lean 4 Formalization}
+
+\author{Ivan Besevic\\
+ESIEE-IT, France\\
+\texttt{ivan.besevic@edu.esiee-it.fr}\\
+ORCID: \texttt{0009-0004-4124-1465}}
+
+\date{November 2026}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+Let $\mathcal{P}_n$ denote the class of complex polynomials $P(z) = z + a_2 z^2 + \dots + a_n z^n$ ($n \ge 2$, $a_n \neq 0$) with critical points $\zeta_1, \dots, \zeta_{n-1} \in \CC \setminus \{0\}$ and inverse critical points $w_k := 1/\zeta_k$. The Dual Smale Mean Value Conjecture (Dubinin--Sugawa, 2009) asserts that $\max_j |P(\zeta_j)/\zeta_j| \ge 1/n$, with equality uniquely at $P_{n,c}(z) = (1 - (1 - cz)^n)/(nc)$. While the conjecture has been completely proved up to degree $n = 9$, the best unconditional all-degree lower bound in the literature remains $(n - 1/2)^{1/n}/n^2 = (1 + o(1))/n^2$ (Jatar--Ng, 2026).
+
+In this paper, we develop a unified analytic framework combining radial-lift comparison and confinement, Grace--Walsh--Szeg\"o with external holomorphic multipliers, Wall--Routh continued-fraction Hurwitz certificates, and orthogonal Jacobi polynomials, establishing five main all-degree theorems completely formalized and kernel-verified in Lean~4.36.0 (5,571 lines across 7 modules, zero \texttt{sorry}, zero \texttt{native\_decide}, strictly the three standard axioms \texttt{propext}, \texttt{Classical.choice}, \texttt{Quot.sound}):
+\begin{enumerate}
+\item \textbf{Exact Radial-Integral Master Theorem, Harmonic Mean Bound, and Quantitative Circle Stability:} For every $n \ge 2$ and $r_1 := \min_k |\zeta_k|$,
+\[
+\max_{1 \le j \le n-1} |P(\zeta_j)| \ge \int_0^{r_1} \prod_{k=1}^{n-1} (1 - |w_k|\, r)\, dr \ge \frac{1}{\frac{1}{r_1} + \sum_{k=1}^{n-1} |w_k|} \ge \frac{r_1}{n}.
+\]
+This upgrades the $0.98/n$ bound of our companion paper to the sharp constant $1/n$ across all degrees, yielding exact harmonic-mean ($\ge 1/(2\sum |w_k|)$), bounded-spread ($\ge 1/(\kappa n)$), and closest-critical-point dichotomy bounds. When all critical points lie on a circle $|\zeta_k| = R$, setting $u_k := R w_k \in \partial\DD$, we prove the explicit quantitative stability inequality
+\[
+\max_{1 \le j \le n-1} \left|\frac{P(\zeta_j)}{\zeta_j}\right| \ge \frac{1}{n} + \frac{|u_{i_0} - u_{j_0}|^2}{16\, n(n - 1)} \qquad (\forall\, i_0, j_0),
+\]
+implying strict uniqueness of the extremal polynomial $P_{n,c}$ on every circle.
+\item \textbf{Multi-Scale Inner-Cluster Confinement Theorem:} If a nonempty inner cluster $I \subseteq \{1, \dots, n - 1\}$ satisfies $r_1 \le |\zeta_k| \le r_m$ ($k \in I$) and $r_m \sum_{k \notin I} |w_k| \le 1/36$ (an absolute threshold independent of $m$ and $n$), then $|P(z)| > 6 r_m$ everywhere on $|z| = 6 r_m$, confining a radial lift to hit an \emph{inner} critical point $\zeta_j$ ($j \in I$) satisfying
+\[
+\left|\frac{P(\zeta_j)}{\zeta_j}\right| \ge \frac{1}{\frac{r_m}{r_1} + \sum_{k \in I} r_m |w_k| + \frac{1}{36}}.
+\]
+In particular, the \emph{exact} $1/n$ Dual Smale Conjecture holds for every separated equal-modulus inner cluster of size $m \le n - 2$, regardless of the global spread $\kappa(P) = r_{\max}/r_1$.
+\item \textbf{Harmonic-Sum Dual Smale Theorems:} Setting $S_j := \sum_{k \neq j} |\zeta_j / \zeta_k|$, we prove $|P(\zeta_j)/\zeta_j| \ge 3 - e > 5/18$ whenever $S_j \le 1$, and $|P(\zeta_j)/\zeta_j| > 18/1000$ whenever $S_j \le 7/4$, yielding an $n$-independent $> 5/18$ lower bound for Chebyshev-squared moduli $|\zeta_k| = k^2 r_1$ with arbitrary complex phases.
+\item \textbf{Exact Closest-Critical-Point Non-Vanishing Threshold ($2 \le n \le 9$) and Sharpness at $n = 10$:} For every $2 \le n \le 9$ and every $P \in \mathcal{P}_n$, no closest critical point $\zeta_{j_0}$ satisfies $P(\zeta_{j_0}) = 0$ (proved via Grace--Walsh--Szeg\"o, Cayley transform, and exact rational Wall--Routh Hurwitz certificates). Conversely, at $n = 10$ there exists $w_0 \in \DD \setminus \{0\}$ (localized inside $D(1/8 - 7i/8, 1/50) \subset \DD$) such that $P'(z) = (1 - z)(1 - w_0 z)^8$ satisfies $P(1) = 0$ at its unique closest critical point $\zeta_1 = 1$.
+\item \textbf{Exact Jacobi--Christoffel--Darboux Univalent Obstruction Family:} For every even degree $n = 2k \ge 2$, we construct explicit polynomials $P_k \in \mathcal{P}_{2k}$ via orthogonal Jacobi-$(0,1)$ polynomials satisfying $P_k'(x) = (1 - x) Q_k(x)^2 \ge 0$ on $[0, 1]$, $P_k'(0) = 1$, $P_k'(1) = 0$, and the exact identity
+\[
+P_k(1) = \int_0^1 (1 - x) Q_k(x)^2\, dx = \frac{1}{k(k + 1)} = \frac{4}{n(n + 2)},
+\]
+quantifying precisely why single-component univalent disk bounds face a $\Theta(1/n^2)$ barrier.
+\end{enumerate}
+\end{abstract}
+
+\section{Introduction}
+
+For $n \ge 2$, let $\mathcal{P}_n$ be the class of complex polynomials of degree $n$ normalized at the origin:
+\[
+P(z) = z + a_2 z^2 + \dots + a_n z^n \in \CC[z], \qquad a_n \neq 0.
+\]
+Writing the critical points of $P$ (zeros of $P'$, counted with multiplicity) as $\zeta_1, \dots, \zeta_{n-1} \in \CC \setminus \{0\}$ and their reciprocals as $w_k := 1/\zeta_k$, we have
+\begin{equation}
+\label{eq:poly-from-w}
+P'(z) = \prod_{k=1}^{n-1} (1 - w_k z), \qquad P(z) = \sum_{m=0}^{n-1} \frac{(-1)^m}{m + 1}\, e_m(w)\, z^{m+1},
+\end{equation}
+where $e_m(w)$ is the $m$-th elementary symmetric polynomial in $w = (w_1, \dots, w_{n-1})$. Set
+\[
+r_1 := \min_{1 \le k \le n-1} |\zeta_k| = \Bigl(\max_k |w_k|\Bigr)^{-1}, \qquad r_{\max} := \max_{1 \le k \le n-1} |\zeta_k|, \qquad \kappa(P) := \frac{r_{\max}}{r_1} \ge 1.
+\]
+
+Following Smale's 1981 mean value conjecture~\cite{Smale1981}, Dubinin and Sugawa~\cite{DubininSugawa2009} posed the dual problem:
+
+\begin{conjecture}[Dual Smale Mean Value Conjecture~\cite{DubininSugawa2009}]
+\label{conj:dual-smale}
+For every $n \ge 2$ and every $P \in \mathcal{P}_n$,
+\[
+\max_{1 \le j \le n-1} \left|\frac{P(\zeta_j)}{\zeta_j}\right| \ge \frac{1}{n},
+\]
+with equality if and only if $P(z) = P_{n,c}(z) := \frac{1 - (1 - cz)^n}{nc}$ for some $c \in \CC \setminus \{0\}$.
+\end{conjecture}
+
+\paragraph{State of the art and context.}
+Conjecture~\ref{conj:dual-smale} has been completely proved for small degrees $n \le 4$~\cite{DubininSugawa2009}, $n \le 6$~\cite{NgZhang2016}, $n = 7$~\cite{Tyson2019}, and formally verified for $n = 8, 9$~\cite{BesevicN8,BesevicN9}. For general degree $n \ge 2$, the best known unconditional lower bound is $(n - 1/2)^{1/n}/n^2 = (1 + o(1))/n^2$ due to Jatar and Ng~\cite{JatarNg2026}, sharpening Dubinin's $1/n^2$ bound~\cite{Dubinin2019}. Exact $1/n$ bounds for all $n \ge 2$ are known in several structured families: polynomials with all critical points on a circle (via radial-lift / Koebe-type arguments going back to Ng~\cite{Ng2003} and Dubinin--Sugawa~\cite{DubininSugawa2009}), real-critical-point and odd polynomials (Tang~\cite{Tang2025}), and polynomials with all critical points in a supporting half-plane $\RePart(\zeta_k/\zeta_j) \ge 1$ (Besevic~\cite{BesevicAllN}).
+
+In our companion paper~\cite{BesevicAllN}, we proved an all-degree critical-value bound $\max_j |P(\zeta_j)| \ge \frac{49}{50n} r_1$ via Grace--Walsh--Szeg\"o and an elementary mountain pass theorem, yielding $98\%$ of Conjecture~\ref{conj:dual-smale} in the equal-modulus and bounded-spread regimes. The present paper substantially extends that program in four directions:
+\begin{enumerate}
+\item Replacing the $0.98/n$ mountain-pass estimate with an \emph{exact radial-lift comparison theorem} (Section~\ref{sec:radial-lift}) recovers the sharp constant $1/n$---and the strictly stronger integral $\int_0^{r_1} \prod_k (1 - |w_k|r)\, dr \ge (1/r_1 + \sum_k |w_k|)^{-1}$---for all $n \ge 2$, together with an explicit \emph{quantitative stability gap} and strict uniqueness on every circle $|\zeta_k| = R$ (Section~\ref{sec:exact-radial}).
+\item Single-disk critical-value bounds degrade as $1/(\kappa n)$ when the global spread $\kappa(P) = r_{\max}/r_1$ is large. Our \emph{Multi-Scale Inner-Cluster Confinement Theorem} (Section~\ref{sec:multiscale}) breaks this spread dependence: whenever a nonempty inner cluster $I$ is separated from outer critical points by an $n$-independent harmonic gap $r_m \sum_{k \notin I} |w_k| \le 1/36$, Grace--Walsh--Szeg\"o with an external holomorphic multiplier confines the radial lift inside $|z| < 6 r_m$, producing an \emph{inner} critical point $\zeta_j$ ($j \in I$) that achieves $O(1/n)$---and the \emph{exact} $1/n$ bound for any separated equal-modulus inner cluster of size $m \le n - 2$---even as $\kappa(P) \to \infty$.
+\item We strengthen the isolated critical-point regime to arbitrary harmonic sums $S_j = \sum_{k \neq j} |\zeta_j / \zeta_k| \le 1$ (giving $\ge 3 - e > 5/18$) and $S_j \le 7/4$ (giving $> 18/1000$), and settle the exact degree threshold ($2 \le n \le 9$ vs.\ $n = 10$) for non-vanishing of $P(\zeta_{j_0})$ at a closest critical point via exact rational Wall--Routh Hurwitz certificates and a rigorous dyadic witness at $n = 10$ (Section~\ref{sec:harmonic-threshold}).
+\item We prove an exact algebraic identity for an explicit Jacobi--Christoffel--Darboux family of degree $n = 2k$ attaining $P_k(1) = 4/(n(n+2)) = \Theta(1/n^2)$ with $P_k' \ge 0$ on $[0, 1]$ (Section~\ref{sec:jacobi}), quantifying the sharp single-component univalent obstruction.
+\end{enumerate}
+
+Every theorem and lemma in this paper has been completely formalized and kernel-verified in Lean~4.36.0 (Section~\ref{sec:lean}).
+
+\section{The Radial-Lift Comparison and Confinement Engine}
+\label{sec:radial-lift}
+
+Our analytic engine is a self-contained radial-lift obstruction theorem formalized in \texttt{RadialLift.lean} using only the holomorphic inverse function theorem, real calculus on $[0, 1]$, and Cauchy's derivative estimate (avoiding covering spaces and Riemann--Hurwitz).
+
+\begin{theorem}[General Radial-Lift Obstruction Theorem]
+\label{thm:radial-obstruction}
+Let $P \in \CC[z]$ satisfy $P(0) = 0$ and $P'(0) = 1$, let $r_1 > 0$, and let $\Phi : \RR \to \RR$ be continuous on $[0, r_1]$ with $\Phi(0) = 0$ and $\Phi'(r) = \varphi(r) > 0$ on $[0, r_1)$, such that
+\begin{equation}
+\label{eq:radial-lb}
+\varphi(|z|) \le |P'(z)| \qquad \text{for all } z \in \CC \text{ with } |z| < r_1.
+\end{equation}
+Let $U \subseteq \CC$ be an open set containing $D(0, r_1)$, and suppose there exist $L_{\max} > \Phi(r_1)$ and $0 < M_{\mathrm{bound}} < L_{\max}$ such that $\overline{D(0, M_{\mathrm{bound}})} \subseteq U$ and every $z \in U$ with $|P(z)| < L_{\max}$ satisfies $|z| \le M_{\mathrm{bound}}$. Then there exists a critical point $\zeta \in U$ of $P$ (i.e.\ $P'(\zeta) = 0$) such that
+\[
+|P(\zeta)| \ge \Phi(r_1).
+\]
+\end{theorem}
+
+\begin{proof}
+Suppose for contradiction that every critical point $\zeta \in U$ of $P$ satisfies $|P(\zeta)| < \Phi(r_1)$.
+For any $w \in D(0, L_{\max})$, consider the radial segment $s \mapsto s w$ ($s \in [0, 1]$) and the set $S_w \subseteq [0, 1]$ of times $t$ for which there exists a continuous lift $\gamma : [0, t] \to U$ with $\gamma(0) = 0$, $P(\gamma(s)) = s w$, and $|\gamma(s)| \le M_{\mathrm{bound}}$ on $[0, t]$.
+
+We claim that no point $z = \gamma(s)$ along any such lift can be a critical point of $P$:
+\begin{itemize}
+\item If $s |w| \ge \Phi(r_1)$, then $|P(z)| = s |w| \ge \Phi(r_1)$, so $P'(z) \neq 0$ by our contradiction hypothesis.
+\item If $s |w| < \Phi(r_1)$, then we claim $|z| < r_1$ (whence $|P'(z)| \ge \varphi(|z|) > 0$). Indeed, suppose instead that $|\gamma(s_1)| \ge r_1$ for some $s_1 \in (0, s]$; let $s_* \in (0, s_1]$ be the first exit time where $|\gamma(s_*)| = r_1$ and $|\gamma(\tau)| < r_1$ on $[0, s_*)$. On any subinterval $[0, s_2] \subset [0, s_*)$, the lift $\gamma$ is $C^1$ with $\gamma'(\tau) = w / P'(\gamma(\tau))$, so the regularized function $\psi_\varepsilon(\tau) := \Phi(\sqrt{|\gamma(\tau)|^2 + \varepsilon^2})$ satisfies
+\[
+\psi_\varepsilon'(\tau) \le \varphi(\sqrt{|\gamma(\tau)|^2 + \varepsilon^2})\, |\gamma'(\tau)| \le \frac{\varphi(\sqrt{|\gamma(\tau)|^2 + \varepsilon^2})}{\varphi(|\gamma(\tau)|)}\, |w|.
+\]
+Integrating over $[0, s_2]$, letting $\varepsilon \to 0^+$ (via uniform continuity of $\varphi$ on compact subsets of $[0, r_1)$), and then $s_2 \to s_*^-$ yields $\Phi(r_1) = \Phi(|\gamma(s_*)|) \le s_* |w| \le s |w| < \Phi(r_1)$, a contradiction.
+\end{itemize}
+Therefore the compact set $K_{\mathrm{safe}} := \{z \in \overline{D(0, M_{\mathrm{bound}})} : \text{$z$ lies on a radial lift from } D(0, L_{\max})\}$ stays away from all zeros of $P'$, and more directly, for each fixed $w \in D(0, L_{\max})$, every point on any lift $\gamma$ satisfies $P'(\gamma(s)) \neq 0$.
+
+By the holomorphic inverse function theorem at non-critical points, $S_w$ is open in $[0, 1]$ and lifts are unique on overlaps. Moreover, along any increasing sequence $t_k \to t_*$ in $S_w$, compactness of $\overline{D(0, M_{\mathrm{bound}})} \subseteq U$ yields a cluster point $z_* \in \overline{D(0, M_{\mathrm{bound}})} \subseteq U$ with $P(z_*) = t_* w$; because $P'(z_*) \neq 0$ (by the same dichotomy applied to the limit of the lift), $P$ is a local homeomorphism around $z_*$, forcing $\lim_{t \to t_*^-} \gamma(t) = z_*$ and extending the lift to $t_*$. Hence $S_w$ is nonempty, open, and closed in $[0, 1]$, so $S_w = [0, 1]$.
+
+Define $g(w) := \gamma_w(1) \in \overline{D(0, M_{\mathrm{bound}})}$ for $w \in D(0, L_{\max})$. By the uniform lower bound on $|P'|$ along $\gamma_{w_0}([0, 1])$ and a quadratic Taylor/IVT stability argument, $g$ is continuous on $D(0, L_{\max})$, hence holomorphic with $P(g(w)) = w$, $g(0) = 0$, $g'(0) = 1/P'(0) = 1$, and $|g(w)| \le M_{\mathrm{bound}}$ for all $w \in D(0, L_{\max})$. By Cauchy's derivative estimate,
+\[
+1 = |g'(0)| \le \frac{M_{\mathrm{bound}}}{L_{\max}} < 1,
+\]
+a contradiction.
+\end{proof}
+
+Two immediate specializations of Theorem~\ref{thm:radial-obstruction} power the entire paper:
+
+\begin{corollary}[Global and Confined Radial-Lift Critical-Value Theorems]
+\label{cor:radial-global-confined}
+Under the hypotheses of Theorem~\ref{thm:radial-obstruction} on $P$, $r_1$, $\Phi$, $\varphi$:
+\begin{enumerate}
+\item \emph{(Global form)} If $\deg P \ge 2$, then there exists a critical point $\zeta \in \CC$ of $P$ with $|P(\zeta)| \ge \Phi(r_1)$.
+\item \emph{(Confined form)} If $R > r_1$, $\Phi(r_1) < R$, and $|P(z)| > R$ for all $z \in \CC$ with $|z| = R$, then there exists a critical point $\zeta \in D(0, R)$ of $P$ with $|P(\zeta)| \ge \Phi(r_1)$.
+\end{enumerate}
+\end{corollary}
+
+\begin{proof}
+For (1), write $P(z) = z Q(z)$ with $\deg Q \ge 1$; coercivity gives $R_0 > 0$ such that $|Q(z)| \ge 2$ for $|z| > R_0$. Setting $M_0 := \max(R_0, 1, |\Phi(r_1)| + 1)$ and $L_{\max} := 2 M_0$ satisfies Theorem~\ref{thm:radial-obstruction} with $U = \CC$.
+For (2), compactness of the circle $|z| = R$ yields $L_0 := \min_{|z|=R} |P(z)| > R$. Set $L_{\max} := (R + L_0)/2 \in (R, L_0)$. The compact set $S_{\mathrm{in}} := \{z \in \overline{D(0, R)} : |P(z)| \le L_{\max}\}$ is disjoint from $|z| = R$, hence attains a maximum modulus $M_{\max} < R$. Taking $M_{\mathrm{bound}} := \max(M_{\max}, R/2) < R < L_{\max}$ and $U = D(0, R)$ applies Theorem~\ref{thm:radial-obstruction}.
+\end{proof}
+
+\section{Exact Radial-Integral Master Theorem and Quantitative Circle Stability}
+\label{sec:exact-radial}
+
+Applying Corollary~\ref{cor:radial-global-confined}(1) to the explicit product lower bound
+\[
+|P'(z)| = \prod_{k=1}^{n-1} |1 - w_k z| \ge \prod_{k=1}^{n-1} (1 - |w_k|\, |z|) \qquad (|z| < r_1)
+\]
+immediately delivers our exact radial-integral master theorem and its harmonic-mean chain.
+
+\begin{theorem}[Exact Radial-Integral and Harmonic-Mean Master Theorem]
+\label{thm:exact-master}
+For every $n \ge 2$ and every $P \in \mathcal{P}_n$ with critical points $\zeta_1, \dots, \zeta_{n-1}$, inverse critical points $w_k = 1/\zeta_k$, and $r_1 = \min_k |\zeta_k|$, there exists a critical point $\zeta_j$ such that
+\begin{equation}
+\label{eq:master-chain}
+|P(\zeta_j)| \ge \int_0^{r_1} \prod_{k=1}^{n-1} (1 - |w_k|\, r)\, dr \ge \frac{1}{\frac{1}{r_1} + \sum_{k=1}^{n-1} |w_k|} \ge \frac{r_1}{n}.
+\end{equation}
+\end{theorem}
+
+\begin{proof}
+The first inequality follows immediately from Corollary~\ref{cor:radial-global-confined}(1) with $\varphi(r) = \prod_{k=1}^{n-1} (1 - |w_k| r)$ and $\Phi(s) = \int_0^s \varphi(r)\, dr$. For the second inequality, concavity of $\log(1 - t)$ gives $(1 - t)^u \le 1 - u t$ for all $t \in [0, 1)$ and $u \in [0, 1]$. Taking $t = r/r_1$ and $u_k = r_1 |w_k| \in [0, 1]$ and multiplying over $k = 1, \dots, n - 1$ yields
+\[
+\prod_{k=1}^{n-1} (1 - |w_k| r) \ge \left(1 - \frac{r}{r_1}\right)^K, \qquad K := r_1 \sum_{k=1}^{n-1} |w_k|.
+\]
+Integrating from $0$ to $r_1$ evaluates cleanly to
+\[
+\int_0^{r_1} \left(1 - \frac{r}{r_1}\right)^K dr = \frac{r_1}{K + 1} = \frac{1}{\frac{1}{r_1} + \sum_{k=1}^{n-1} |w_k|}.
+\]
+Finally, since $|w_k| \le 1/r_1$ for all $k$, we have $\frac{1}{r_1} + \sum_{k=1}^{n-1} |w_k| \le \frac{n}{r_1}$, yielding the final inequality $\ge r_1/n$.
+\end{proof}
+
+\begin{corollary}[Harmonic-Mean, Bounded-Spread, Dichotomy, and Equal-Modulus Bounds]
+\label{cor:exact-corollaries}
+For every $n \ge 2$ and every $P \in \mathcal{P}_n$:
+\begin{enumerate}
+\item \emph{(Exact Harmonic-Mean Critical Value)} $\max_j |P(\zeta_j)| \ge \dfrac{1}{2 \sum_{k=1}^{n-1} |w_k|}$.
+\item \emph{(Exact Bounded-Spread Dual Smale)} $\max_j \left|\dfrac{P(\zeta_j)}{\zeta_j}\right| \ge \dfrac{1}{\kappa(P)\, n}$, where $\kappa(P) = r_{\max}/r_1$.
+\item \emph{(Exact $1/n$ Closest-Critical-Point Dichotomy)} Either $\max_j |P(\zeta_j)/\zeta_j| \ge 1/n$, or the critical point $\zeta_j$ attaining $\max_j |P(\zeta_j)|$ is strictly farther from the origin than $r_1$ (in fact $|\zeta_j| > r_1$).
+\item \emph{(Exact Equal-Modulus Dual Smale~\cite{Ng2003,DubininSugawa2009})} If $|\zeta_1| = \dots = |\zeta_{n-1}| = R$, then $\max_j |P(\zeta_j)/\zeta_j| \ge 1/n$.
+\end{enumerate}
+\end{corollary}
+
+\begin{proof}
+(1) follows from $\frac{1}{r_1} = \max_k |w_k| \le \sum_{k=1}^{n-1} |w_k|$ in~\eqref{eq:master-chain}. (2) divides $|P(\zeta_j)| \ge r_1/n$ by $|\zeta_j| \le \kappa r_1$. (3) notes that if $|\zeta_j| = r_1$, then $|P(\zeta_j)/\zeta_j| = |P(\zeta_j)|/r_1 \ge 1/n$. (4) is the special case $\kappa(P) = 1$ of (2).
+\end{proof}
+
+We now sharpen Corollary~\ref{cor:exact-corollaries}(4) to an explicit \emph{quantitative stability inequality} on every circle $|\zeta_k| = R$, yielding strict uniqueness of $P_{n,c}$ as an immediate algebraic corollary.
+
+\begin{lemma}[Two-Unit-Factor Quantitative Lower Bound]
+\label{lem:two-unit}
+Let $u, v \in \CC$ satisfy $|u| = |v| = 1$, and set $c := 1 - |u + v|/2 \in [0, 1]$. Then for every $z \in \CC$ with $r := |z| \le 1$,
+\[
+|1 - u z|\, |1 - v z| \ge (1 - r)^2 + \frac{c}{2}\, r(1 - r).
+\]
+Moreover, $c \ge |u - v|^2 / 8$.
+\end{lemma}
+
+\begin{proof}
+Since $\RePart(uz) + \RePart(vz) = \RePart((u + v)z) \le |u + v|\, r = 2(1 - c) r$, at least one of $w \in \{u, v\}$ satisfies $\RePart(wz) \le (1 - c) r$. For that $w$,
+\[
+|1 - w z|^2 = 1 - 2\RePart(wz) + r^2 \ge (1 - r)^2 + 2 c r \ge \left((1 - r) + \frac{c}{2} r\right)^2,
+\]
+because $2 c r - c r(1 - r) - \frac{c^2}{4} r^2 = c r + c r^2(1 - c/4) \ge 0$ for $c \in [0, 1]$. Taking square roots and multiplying by the trivial bound $|1 - w' z| \ge 1 - r$ for the other factor gives the first claim. For the second, the parallelogram law $|u + v|^2 + |u - v|^2 = 4$ gives $|u - v|^2 = (2 - |u+v|)(2 + |u+v|) \le 4(2 - |u+v|) = 8c$.
+\end{proof}
+
+\begin{theorem}[Quantitative Stability and Strict Uniqueness on Circles]
+\label{thm:circle-stability}
+Let $n \ge 2$ and $P \in \mathcal{P}_n$ have all critical points on the circle $|\zeta_k| = R > 0$, with unit directions $u_k := R w_k \in \partial\DD$. Then for every pair of indices $i_0, j_0 \in \{1, \dots, n - 1\}$,
+\begin{equation}
+\label{eq:circle-stability}
+\max_{1 \le j \le n-1} \left|\frac{P(\zeta_j)}{\zeta_j}\right| \ge \frac{1}{n} + \frac{|u_{i_0} - u_{j_0}|^2}{16\, n(n - 1)}.
+\end{equation}
+In particular, $\max_j |P(\zeta_j)/\zeta_j| = 1/n$ holds if and only if $u_1 = \dots = u_{n-1}$, i.e.\ $P(z) = P_{n,c}(z)$ with $|c| = 1/R$.
+\end{theorem}
+
+\begin{proof}
+If $i_0 = j_0$, the claim reduces to Corollary~\ref{cor:exact-corollaries}(4). Otherwise $n \ge 3$. Set $c := 1 - |u_{i_0} + u_{j_0}|/2 \ge 0$ and $z' := z/R$. For $|z| < R$, factoring out $i_0, j_0$ and applying Lemma~\ref{lem:two-unit} together with $|1 - u_k z'| \ge 1 - |z'|$ for the remaining $n - 3$ indices yields
+\[
+|P'(z)| \ge \varphi(|z|) := \left(1 - \frac{|z|}{R}\right)^{n-1} + \frac{c}{2}\frac{|z|}{R}\left(1 - \frac{|z|}{R}\right)^{n-2}.
+\]
+The explicit antiderivative $\Phi(s) = \int_0^s \varphi(r)\, dr$ satisfies
+\[
+\Phi(R) = R\left(\frac{1}{n} + \frac{c}{2}\left(\frac{1}{n - 1} - \frac{1}{n}\right)\right) = R\left(\frac{1}{n} + \frac{c}{2 n(n - 1)}\right).
+\]
+Applying Corollary~\ref{cor:radial-global-confined}(1), dividing by $|\zeta_j| = R$, and substituting $c \ge |u_{i_0} - u_{j_0}|^2 / 8$ yields~\eqref{eq:circle-stability}. If $\max_j |P(\zeta_j)/\zeta_j| \le 1/n$, then $|u_{i_0} - u_{j_0}|^2 \le 0$ for all $i_0, j_0$, forcing all critical points to coincide.
+\end{proof}
+
+\section{Multi-Scale Inner-Cluster Confinement}
+\label{sec:multiscale}
+
+The single-disk bound $\max_j |P(\zeta_j)/\zeta_j| \ge 1/(\kappa n)$ in Corollary~\ref{cor:exact-corollaries}(2) loses a factor of $\kappa = r_{\max}/r_1$ whenever distant outer critical points are present. We now overcome this spread barrier whenever an inner cluster $I$ of arbitrary size $1 \le m \le n - 1$ is separated from the outer critical points by an \emph{absolute} ($m$- and $n$-independent) harmonic gap.
+
+\begin{theorem}[GWS Circle Lower Bound with External Holomorphic Multiplier]
+\label{thm:circle-gap}
+Let $n \ge 2$, $P \in \mathcal{P}_n$, and let $I \subseteq \{1, \dots, n - 1\}$ be a nonempty subset of size $m := |I| \ge 1$. Suppose there exists $r_m > 0$ such that
+\[
+|\zeta_k| \le r_m \quad (\forall\, k \in I) \qquad \text{and} \qquad r_m \sum_{k \notin I} |w_k| \le \frac{1}{36}.
+\]
+Then for every $z \in \CC$ with $|z| = 6 r_m$,
+\[
+|P(z)| > 6 r_m.
+\]
+\end{theorem}
+
+\begin{proof}
+By the fundamental theorem of calculus along the segment $t \mapsto t z$ ($t \in [0, 1]$),
+\[
+P(z) = z \int_0^1 \prod_{k=1}^{n-1} (1 - w_k z t)\, dt = z \left(\prod_{k \in I} w_k\right) \int_0^1 \left(\prod_{k \in I} (\zeta_k - z t)\right) R_{\mathrm{out}}(t)\, dt,
+\]
+where $R_{\mathrm{out}}(t) := \prod_{k \notin I} (1 - w_k z t)$. Expanding $\prod_{k \in I} (\zeta_k - z t) = \sum_{d=0}^m e_d(\zeta_I) (-z t)^{m - d}$ expresses the integral as a symmetric multiaffine form $F(\zeta_I) = \sum_{d=0}^m c_d\, e_d(\zeta_I)$ with $c_d := \int_0^1 (-z t)^{m - d} R_{\mathrm{out}}(t)\, dt$. Since every inner critical point $\zeta_k$ ($k \in I$) lies in the closed disk $\overline{D(0, r_m)}$, the Grace--Walsh--Szeg\"o coincidence theorem produces a single point $\zeta_0 \in \overline{D(0, r_m)}$ such that
+\[
+\int_0^1 \left(\prod_{k \in I} (\zeta_k - z t)\right) R_{\mathrm{out}}(t)\, dt = \int_0^1 (\zeta_0 - z t)^m R_{\mathrm{out}}(t)\, dt.
+\]
+Set $A := |\zeta_0 - z|$. Since $|z| = 6 r_m$ and $|\zeta_0| \le r_m$, we have $A \ge 5 r_m$, $|\zeta_0| \le A/5$, and $6 r_m \le \frac{6}{5} A$. Split the integral as $I_{\mathrm{main}} + I_{\mathrm{err}}$ using $R_{\mathrm{out}}(t) = 1 + (R_{\mathrm{out}}(t) - 1)$:
+\begin{itemize}
+\item \emph{Main term:} Evaluating the antiderivative explicitly gives
+\[
+|I_{\mathrm{main}}| = \left|\frac{\zeta_0^{m+1} - (\zeta_0 - z)^{m+1}}{(m + 1) z}\right| \ge \frac{A^{m+1} - (A/5)^{m+1}}{(m + 1) \cdot \frac{6}{5} A} \ge \frac{(1 - 1/25) A^m}{\frac{6}{5}(m + 1)} = \frac{4}{5}\frac{A^m}{m + 1},
+\]
+using $5^{m+1} \ge 25$ for $m \ge 1$.
+\item \emph{Outer perturbation:} By induction, $\left|\prod_{k \notin I} (1 - u_k) - 1\right| \le \exp\bigl(\sum_{k \notin I} |u_k|\bigr) - 1$. For $t \in [0, 1]$, $\sum_{k \notin I} |w_k z t| \le 6 r_m \sum_{k \notin I} |w_k| \le 1/6$, whence $|R_{\mathrm{out}}(t) - 1| \le e^{1/6} - 1 \le 1/5$ (since $e^{-1/6} \ge 5/6$). Meanwhile, writing $\zeta_0 - z t = (1 - t)\zeta_0 + t(\zeta_0 - z)$ gives $|\zeta_0 - z t| \le \frac{1 + 4 t}{5} A$, so
+\[
+|I_{\mathrm{err}}| \le \frac{1}{5} A^m \int_0^1 \left(\frac{1 + 4 t}{5}\right)^m dt = \frac{1}{5} A^m \cdot \frac{5}{4(m + 1)}\left(1 - 5^{-(m+1)}\right) \le \frac{1}{4}\frac{A^m}{m + 1}.
+\]
+\end{itemize}
+Subtracting yields $|I_{\mathrm{main}} + I_{\mathrm{err}}| \ge (\frac{4}{5} - \frac{1}{4}) \frac{A^m}{m + 1} = \frac{11}{20} \frac{A^m}{m + 1}$. Using $|w_k| \ge 1/r_m$ ($k \in I$), $A \ge 5 r_m$, and the elementary inequality $5^m \ge 2(m + 1)$ for all $m \ge 1$, we conclude
+\[
+|P(z)| \ge 6 r_m \cdot r_m^{-m} \cdot \frac{11}{20} \frac{(5 r_m)^m}{m + 1} = 6 r_m \cdot \frac{11}{20} \frac{5^m}{m + 1} \ge \frac{11}{10}(6 r_m) > 6 r_m. \qedhere
+\]
+\end{proof}
+
+Combining Theorem~\ref{thm:circle-gap} with the confined radial-lift theorem (Corollary~\ref{cor:radial-global-confined}(2)) yields our main multi-scale theorem:
+
+\begin{theorem}[Multi-Scale Inner-Cluster Confinement Theorem]
+\label{thm:multiscale}
+Let $n \ge 2$, $P \in \mathcal{P}_n$, and let $I \subseteq \{1, \dots, n - 1\}$ be a nonempty inner cluster satisfying
+\[
+r_1 \le |\zeta_k| \le r_m \quad (\forall\, k \in I) \qquad \text{and} \qquad r_m \sum_{k \notin I} |w_k| \le \frac{1}{36}.
+\]
+Then there exists an \emph{inner} critical point $\zeta_j$ ($j \in I$) such that
+\begin{equation}
+\label{eq:multiscale-bound}
+\left|\frac{P(\zeta_j)}{\zeta_j}\right| \ge \frac{1}{\dfrac{r_m}{r_1} + \sum_{k \in I} r_m |w_k| + \dfrac{1}{36}}.
+\end{equation}
+In particular, if $n \ge 3$ and $I$ is an equal-modulus inner cluster ($|\zeta_k| = R$ for all $k \in I$) of size $m = |I| \le n - 2$ satisfying $R \sum_{k \notin I} |w_k| \le 1/36$, then the \emph{exact} Dual Smale Conjecture holds on $I$:
+\[
+\exists\, j \in I, \qquad \left|\frac{P(\zeta_j)}{\zeta_j}\right| \ge \frac{1}{n}.
+\]
+\end{theorem}
+
+\begin{proof}
+Every outer critical point $k \notin I$ satisfies $|w_k| \le \frac{1}{36 r_m} < \frac{1}{r_1}$, so $|\zeta_k| \ge 36 r_m > 6 r_m$ and $|w_k| \le 1/r_1$ holds for \emph{all} $k \in \{1, \dots, n - 1\}$. Setting $K := r_1 \sum_{k=1}^{n-1} |w_k|$ and $\Phi(r) := \frac{r_1}{K + 1}(1 - (1 - r/r_1)^{K+1})$, we have $\Phi(r_1) = \frac{r_1}{K + 1} \le r_1 < 6 r_m$ and $|P(z)| > 6 r_m$ on $|z| = 6 r_m$ by Theorem~\ref{thm:circle-gap}. Corollary~\ref{cor:radial-global-confined}(2) produces a critical point $\zeta_j$ with $|\zeta_j| < 6 r_m$ and $|P(\zeta_j)| \ge \frac{r_1}{K + 1}$. Since every outer critical point satisfies $|\zeta_k| \ge 36 r_m > 6 r_m$, we must have $j \in I$, hence $|\zeta_j| \le r_m$. Dividing by $|\zeta_j| \le r_m$ gives
+\[
+\left|\frac{P(\zeta_j)}{\zeta_j}\right| \ge \frac{r_1}{(K + 1) r_m} = \frac{1}{\frac{r_m}{r_1} + r_m \sum_{k \in I} |w_k| + r_m \sum_{k \notin I} |w_k|} \ge \frac{1}{\frac{r_m}{r_1} + \sum_{k \in I} r_m |w_k| + \frac{1}{36}}.
+\]
+When $|\zeta_k| = R$ for all $k \in I$ and $m = |I| \le n - 2$, the denominator is $1 + m + \frac{1}{36} \le n - 1 + \frac{1}{36} < n$, yielding $|P(\zeta_j)/\zeta_j| \ge 1/n$.
+\end{proof}
+
+\section{Harmonic-Sum Bounds and the Exact Non-Vanishing Threshold ($n \le 9$ vs.\ $n = 10$)}
+\label{sec:harmonic-threshold}
+
+\subsection{Harmonic-Sum Dual Smale Theorems}
+
+Rescaling a designated critical point $\zeta_j$ to $1$ and permuting the remaining $n - 2$ normalized inverse critical points into $u = (u_1, \dots, u_{n-2})$ ($u_i = \zeta_j / \zeta_{k_i} = w_{k_i} / w_j$), telescoping $e_{m+1}(u, 1) = e_{m+1}(u) + e_m(u)$ in~\eqref{eq:poly-from-w} yields the symmetric multiaffine form~\cite{BesevicAllN}
+\begin{equation}
+\label{eq:p1form}
+\frac{P(\zeta_j)}{\zeta_j} = \mathcal{F}_n(u) := \sum_{m=0}^{n-2} \frac{(-1)^m}{(m + 1)(m + 2)}\, e_m(u) = \frac{1}{2} + \sum_{m=1}^{n-2} \frac{(-1)^m}{(m + 1)(m + 2)}\, e_m(u).
+\end{equation}
+
+\begin{theorem}[Harmonic-Sum Dual Smale Theorems]
+\label{thm:harmonic-sum}
+Let $n \ge 2$, $P \in \mathcal{P}_n$, and fix any critical point $\zeta_j$ with harmonic tail $S_j := \sum_{k \neq j} |\zeta_j / \zeta_k| = \sum_{k \neq j} |w_k / w_j|$.
+\begin{enumerate}
+\item If $S_j \le 1$, then $\left|\dfrac{P(\zeta_j)}{\zeta_j}\right| \ge 3 - e > \dfrac{5}{18}$.
+\item If $S_j \le \dfrac{7}{4}$, then $\left|\dfrac{P(\zeta_j)}{\zeta_j}\right| > \dfrac{18}{1000}$.
+\item \emph{(Chebyshev-Squared Moduli Corollary)} If $|\zeta_k| = k^2 r_1$ ($k = 1, \dots, n - 1$) with arbitrary complex arguments, then $\left|\dfrac{P(\zeta_1)}{\zeta_1}\right| > \dfrac{5}{18}$ for every $n \ge 2$.
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+By induction on $m$ using the binomial inequality $S'^{d+1} + (d + 1) a S'^d \le (S' + a)^{d+1}$, we have $|e_d(u)| \cdot d! \le \bigl(\sum_i |u_i|\bigr)^d$ for all $d \ge 0$. Substituting into~\eqref{eq:p1form} for any $S > 0$ with $S_j \le S$ gives
+\[
+\left|\mathcal{F}_n(u) - \frac{1}{2}\right| \le \sum_{m=1}^{n-2} \frac{S^m}{(m + 2)!} = \frac{1}{S^2} \sum_{m=1}^{n-2} \frac{S^{m+2}}{(m + 2)!} \le \frac{e^S - 1 - S - S^2/2}{S^2}.
+\]
+Setting $S = 1$ gives $|P(\zeta_j)/\zeta_j| \ge \frac{1}{2} - (e - \frac{5}{2}) = 3 - e > 5/18$ (using $e < 2.7182818286$). Setting $S = 7/4$ and verifying $e^{7/4} = (e^{7/8})^2 < 2.399^2 < 5.756$ via the 8-term Taylor remainder bound gives $|P(\zeta_j)/\zeta_j| > 18/1000$. Finally, for $|\zeta_k| = k^2 r_1$, telescoping gives $S_1 = \sum_{k=2}^{n-1} \frac{1}{k^2} \le \sum_{k=1}^{n-2} (\frac{1}{k} - \frac{1}{k+1}) = 1 - \frac{1}{n-1} \le 1$, so (1) applies.
+\end{proof}
+
+\subsection{Exact Closest-Critical-Point Non-Vanishing for $2 \le n \le 9$ and Sharpness at $n = 10$}
+
+A natural question is whether the closest critical point $\zeta_{j_0}$ (attaining $|\zeta_{j_0}| = r_1$) can ever be a root of $P$ itself. We prove that $n = 10$ is the \emph{exact} sharp threshold.
+
+Recall~\cite{BesevicAllN} that the diagonal specialization $G_n(w) := \mathcal{F}_n(w, \dots, w)$ satisfies the reciprocal identity
+\begin{equation}
+\label{eq:gn-rn}
+n(n - 1)\, G_n(w) = R_n(1 - w) := \sum_{j=0}^{n-2} (n - 1 - j)(1 - w)^j.
+\end{equation}
+Under the Cayley transform $w = \frac{1 - s}{1 + s}$ (mapping $\overline{\DD} \setminus \{-1\}$ onto $\{\RePart s \ge 0\}$ with $1 - w = \frac{2s}{1+s}$), zero-freeness of $R_n(1 - w)$ on $\overline{\DD}$ reduces to Hurwitz stability of
+\[
+H_n(s) := (1 + s)^{n-2} R_n\left(\frac{2s}{1+s}\right) = \sum_{j=0}^{n-2} (n - 1 - j)(2 s)^j (1 + s)^{n - 2 - j}
+\]
+on the closed right half-plane $\{\RePart s \ge 0\}$ (together with $R_n(2) > 0$ at $w = -1$).
+
+Given a nonempty list of positive reals $[c_1, \dots, c_d]$, define the Wall--Routh continued-fraction pair $(P_k, Q_k)$ bottom-up by $(P_0, Q_0) = (1, 0)$ and $(P_k, Q_k) = (c_k s P_{k-1} + Q_{k-1},\, P_{k-1})$, and set $W([c_1, \dots, c_d], s) := P_d(s) + Q_d(s)$.
+
+\begin{lemma}[Wall--Routh Hurwitz Certificate]
+\label{lem:wall-routh}
+For any nonempty list of strictly positive reals $[c_1, \dots, c_d]$ and any $s \in \CC$ with $\RePart s \ge 0$, we have $W([c_1, \dots, c_d], s) \neq 0$.
+\end{lemma}
+
+\begin{proof}
+For $\RePart s > 0$, induction shows $P_k(s), Q_k(s) \neq 0$ and $\RePart(P_k(s)/Q_k(s)) > 0$ via $P_k/Q_k = c_k s + (P_{k-1}/Q_{k-1})^{-1}$, preventing $P_d/Q_d = -1$. On the imaginary axis $\RePart s = 0$, induction shows $P_k(s)$ and $Q_k(s)$ have opposite real/imaginary parity and never vanish simultaneously, preventing $P_d(s) + Q_d(s) = 0$.
+\end{proof}
+
+\begin{theorem}[Exact Non-Vanishing Threshold for Closest Critical Points]
+\label{thm:nonvanishing-threshold}
+\leavevmode
+\begin{enumerate}
+\item For every degree $2 \le n \le 9$, every polynomial $P \in \mathcal{P}_n$, and every closest critical point $\zeta_{j_0}$ ($|\zeta_{j_0}| = r_1$), we have $P(\zeta_{j_0}) \neq 0$.
+\item \emph{(Sharpness at $n = 10$)} There exists $w_0 \in D(1/8 - 7i/8,\, 1/50) \subset \DD \setminus \{0\}$ such that $R_{10}(1 - w_0) = 0$, and consequently the degree-$10$ polynomial $P \in \mathcal{P}_{10}$ with $P'(z) = (1 - z)(1 - w_0 z)^8$ has $\zeta_1 = 1$ as its unique closest critical point and satisfies $P(1) = 0$.
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+For (1), at $n = 2$ we have $P(\zeta_1)/\zeta_1 = 1/2 \neq 0$. For $3 \le n \le 9$, every normalized ratio $u_i = \zeta_{j_0}/\zeta_{k_i}$ lies in $\overline{\DD}$, so Grace--Walsh--Szeg\"o produces $\zeta \in \overline{\DD}$ with $P(\zeta_{j_0})/\zeta_{j_0} = G_n(\zeta) = \frac{1}{n(n-1)} R_n(1 - \zeta)$. By Lemma~\ref{lem:wall-routh} and the exact rational Wall--Routh identities $H_n(s) = (n - 1)\, W(\mathbf{c}_n, s)$ listed in Table~\ref{tab:wall-routh} (each verified by exact polynomial identity in Lean~4), $H_n(s) \neq 0$ for all $\RePart s \ge 0$, hence $R_n(1 - \zeta) \neq 0$.
+
+For (2), set $Q(w) := R_{10}(1 - w) = \sum_{j=0}^8 (9 - j)(1 - w)^j$, center $w_c := \frac{1}{8} - \frac{7}{8} i$, and radius $r := \frac{1}{50}$. Note that $u := 1 - w_c = \frac{7}{8}(1 + i)$ has exact dyadic powers ($u^2 = \frac{49}{32} i$, $u^4 = -\frac{2401}{1024}$, $u^8 = \frac{5764801}{1048576}$), and $\frac{1}{2} < |w_c| = \frac{\sqrt{50}}{8} < \frac{9}{10}$, so $\overline{D(w_c, r)} \subset \DD \setminus \{0\}$. Expanding $Q(w_c + h) = \sum_{k=0}^8 c_k h^k$, exact rational norm-squared checks verify $|c_0| < 3/5$, $|c_1| > 75$, $|c_2| r^2 \le 1/10$, and $|c_k| r^k \le 1/60$ for $3 \le k \le 8$. Hence on the circle $|h| = r = 1/50$,
+\[
+|Q(w_c + h)| \ge |c_1| r - |c_2| r^2 - \sum_{k=3}^8 |c_k| r^k - |c_0| > \frac{3}{2} - \frac{1}{10} - \frac{1}{10} - \frac{3}{5} = \frac{7}{10}.
+\]
+If $Q$ had no root in $\overline{D(w_c, r)}$, then $f(w) := Q(w)^{-1}$ would be holomorphic on $D(w_c, r)$ and continuous on $\overline{D(w_c, r)}$ with $|f| \le 10/7$ on $\partial D(w_c, r)$ while $|f(w_c)| = |c_0|^{-1} > 5/3 > 10/7$, contradicting the Maximum Modulus Principle. Thus $\exists w_0 \in \overline{D(w_c, r)} \subset \DD \setminus \{0\}$ with $R_{10}(1 - w_0) = 0$, giving $P(1) = G_{10}(w_0) = 0$.
+\end{proof}
+
+\begin{table}[h]
+\centering
+\scriptsize
+\begin{tabular}{@{}cl@{}}
+\toprule
+$n$ & Exact positive rational Wall--Routh quotients $\mathbf{c}_n$ satisfying $H_n(s) = (n - 1)\, W(\mathbf{c}_n, s)$ \\
+\midrule
+$3$ & $[2]$ \\
+$4$ & $[\frac{11}{10},\, \frac{10}{3}]$ \\
+$5$ & $[\frac{13}{16},\, \frac{128}{59},\, \frac{59}{16}]$ \\
+$6$ & $[\frac{19}{28},\, \frac{84}{47},\, \frac{2209}{896},\, \frac{896}{235}]$ \\
+$7$ & $[\frac{20}{33},\, \frac{3267}{2008},\, \frac{504008}{235389},\, \frac{50879689}{21051872},\, \frac{83872}{21399}]$ \\
+$8$ & $[\frac{247}{438},\, \frac{31974}{20383},\, \frac{415466689}{192790080},\, \frac{36326404800}{17338044779},\, \frac{723542475769}{331736267520},\, \frac{24117504}{5954291}]$ \\
+$9$ & $[\frac{251}{466},\, \frac{108578}{69253},\, \frac{4795978009}{1919999220},\, \frac{1414650069075}{411265034764},\, \frac{8816706858436}{2011392144245},\, \frac{25738722258843}{17352245329424},\, \frac{11687792}{8787273}]$ \\
+\bottomrule
+\end{tabular}
+\caption{Exact rational Wall--Routh Hurwitz certificates proving $R_n(1 - w) \neq 0$ on $\overline{\DD}$ for $3 \le n \le 9$.}
+\label{tab:wall-routh}
+\end{table}
+
+\section{The Exact Jacobi--Christoffel--Darboux Univalent Obstruction}
+\label{sec:jacobi}
+
+Why do all known unconditional all-degree lower bounds~\cite{Dubinin2019,JatarNg2026} stop at $\Theta(1/n^2)$? A fundamental reason is that any method relying solely on the single critical point on the boundary of the maximal univalent preimage disk $U_0(L_*)$ around $0$ cannot rule out a polynomial whose derivative is nonnegative on $[0, 1]$, vanishes at $x = 1$, and yet has an $O(1/n^2)$ integral on $[0, 1]$ (while its remaining critical points have much smaller moduli). We formalize the exact sharp orthogonal-polynomial extremal family for this obstruction.
+
+For each $j \ge 0$, define the shifted Jacobi-$(0, 1)$ polynomial on $[0, 1]$ and its Rodrigues generator:
+\[
+J_j(x) := \sum_{m=0}^j (-1)^m \binom{j}{m}\binom{j + 1}{m} x^m (1 - x)^{j - m}, \qquad
+\mathcal{R}_j(x) := \frac{d^j}{dx^j}\bigl[x^j (1 - x)^{j + 1}\bigr].
+\]
+For every $k \ge 1$ (corresponding to even degree $n = 2k$), define the Christoffel--Darboux extremal polynomial of degree $k - 1$:
+\[
+Q_k(x) := \frac{2}{k(k + 1)} \sum_{j=0}^{k-1} (j + 1)\, J_j(x).
+\]
+
+\begin{theorem}[Exact Jacobi--Christoffel--Darboux Univalent Obstruction Family]
+\label{thm:jacobi}
+For every $j \ge 0$, $j!\, (1 - x) J_j(x) = \mathcal{R}_j(x)$, $J_j(0) = 1$, and
+\[
+\int_0^1 (1 - x)\, J_i(x)\, J_j(x)\, dx = \frac{\delta_{ij}}{2(j + 1)}.
+\]
+Consequently, for every $k \ge 1$ ($n = 2k$), the polynomial $P_k \in \mathcal{P}_{2k}$ defined by $P_k(0) = 0$ and $P_k'(x) := (1 - x) Q_k(x)^2$ satisfies:
+\begin{enumerate}
+\item $Q_k(0) = 1$, hence $P_k'(0) = 1$ and $P_k'(1) = 0$;
+\item $P_k'(x) \ge 0$ for all $x \in [0, 1]$ (so $P_k$ maps $[0, 1]$ monotonically onto $[0, P_k(1)]$);
+\item the exact critical-value identity
+\begin{equation}
+\label{eq:jacobi-exact}
+P_k(1) = \int_0^1 (1 - x)\, Q_k(x)^2\, dx = \frac{1}{k(k + 1)} = \frac{4}{n(n + 2)}.
+\end{equation}
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+Expanding $\mathcal{R}_j(x)$ by the $j$-th Leibniz rule and reindexing $m \mapsto j - m$ matches $j!(1 - x) J_j(x)$ term by term. Integrating by parts $j$ times against any polynomial $g$ with $\deg g \le j$ uses vanishing of $\mathcal{R}_j^{(r)}$ at $x = 0, 1$ ($r < j$) and the elementary Beta integral $\int_0^1 x^a (1 - x)^b\, dx = \frac{a!\, b!}{(a + b + 1)!}$, yielding orthogonality for $i < j$ and the exact squared norm $\frac{1}{2(j + 1)}$ for $i = j$. Finally, $Q_k(0) = \frac{2}{k(k+1)} \sum_{j=0}^{k-1} (j + 1) = 1$, and expanding $\int_0^1 (1 - x) Q_k(x)^2\, dx$ by orthogonality gives
+\[
+\frac{4}{k^2 (k + 1)^2} \sum_{j=0}^{k-1} \frac{(j + 1)^2}{2(j + 1)} = \frac{2}{k^2 (k + 1)^2} \cdot \frac{k(k + 1)}{2} = \frac{1}{k(k + 1)} = \frac{4}{n(n + 2)}. \qedhere
+\]
+\end{proof}
+
+Theorem~\ref{thm:jacobi} shows that even among polynomials with $P' \ge 0$ on $[0, 1]$, the critical value at $\zeta = 1$ can be as small as $4/(n(n+2))$; the Dual Smale Conjecture holds for $P_k$ only because its \emph{other} critical points (the zeros of $Q_k$ in $(0, 1)$, scaling as $\Theta(1/n^2)$) carry much larger quotients $|P_k(\zeta_j)/\zeta_j|$. This explains structurally why breaking $O(1/n^2)$ unconditionally requires multi-scale confinement (as in Theorem~\ref{thm:multiscale}) or multi-critical-point invariants.
+
+\section{Complete Lean 4.36.0 Formalization and Axiom Audit}
+\label{sec:lean}
+
+Every theorem and lemma in Sections~\ref{sec:radial-lift}--\ref{sec:jacobi} has been formally verified in Lean~4.36.0 against Mathlib, with zero \texttt{sorry}, zero \texttt{admit}, zero \texttt{native\_decide}, and zero external numerical dependencies. Table~\ref{tab:lean} summarizes the 7 verified modules (5,571 lines total); executing \texttt{lake env lean check\_axioms.lean} confirms that all 25 audited declarations depend strictly on the three standard Lean axioms \texttt{[propext, Classical.choice, Quot.sound]}.
+
+\begin{table}[h]
+\centering
+\scriptsize
+\begin{tabular}{@{} >{\raggedright\arraybackslash}p{3.1cm} >{\raggedright\arraybackslash}p{6.3cm} >{\raggedright\arraybackslash}p{5.0cm} @{}}
+\toprule
+Lean Module (Lines) & Formalized Declaration(s) & Mathematical Result \\
+\midrule
+\texttt{GraceWalshSzego} (979) & \texttt{grace\_walsh\_szego\_closedBall} & Shifted-disk GWS coincidence \\
+\texttt{PolynomialReduction} (546) & \texttt{GnPoly\_eq\_RnPoly}, \texttt{dualSmaleQuotient\_at\_one} & Identities~\eqref{eq:p1form} and~\eqref{eq:gn-rn} \\
+\texttt{RadialLift} (1,261) & \texttt{radial\_lift\_obstruction}, \texttt{radial\_lift\_critical\_value\_ge}, \texttt{radial\_lift\_confined\_critical\_value\_ge} & Theorem~\ref{thm:radial-obstruction} \& Corollary~\ref{cor:radial-global-confined} \\
+\texttt{ExactCriticalValue} (725) & \texttt{exact\_radial\_integral\_critical\_value}, \texttt{exact\_harmonic\_critical\_value}, \texttt{exact\_rmin\_div\_n\_critical\_value} & Theorem~\ref{thm:exact-master} (exact chain~\eqref{eq:master-chain}) \\
+\texttt{ExactCriticalValue} & \texttt{exact\_harmonic\_mean\_half}, \texttt{exact\_bounded\_spread\_dual\_smale}, \texttt{exact\_closest\_crit\_dichotomy}, \texttt{exact\_equal\_modulus\_dual\_smale} & Corollary~\ref{cor:exact-corollaries} (all four corollaries) \\
+\texttt{ExactCriticalValue} & \texttt{equal\_modulus\_quantitative\_stability}, \texttt{equal\_modulus\_strict\_uniqueness} & Theorem~\ref{thm:circle-stability} (stability + uniqueness) \\
+\texttt{MultiScaleConfinement} (596) & \texttt{circle\_lower\_bound\_of\_cluster\_gap}, \texttt{multiscale\_inner\_cluster\_confinement}, \texttt{multiscale\_exact\_dual\_smale\_cluster} & Theorems~\ref{thm:circle-gap} and~\ref{thm:multiscale} (exact $1/n$ on isolated clusters) \\
+\texttt{HarmonicAndThreshold} (850) & \texttt{harmonic\_sum\_dual\_smale\_one}, \texttt{harmonic\_sum\_dual\_smale\_seven\_quarters}, \texttt{chebyshev\_squared\_dual\_smale} & Theorem~\ref{thm:harmonic-sum} ($S_j \le 1$, $S_j \le 7/4$, Chebyshev-squared) \\
+\texttt{HarmonicAndThreshold} & \texttt{wallSum\_ne\_zero\_of\_re\_nonneg}, \texttt{RnPoly\_one\_sub\_ne\_zero\_le\_9}, \texttt{closest\_crit\_nonvanishing\_le\_9}, \texttt{closest\_crit\_vanishing\_witness\_10} & Lemma~\ref{lem:wall-routh} \& Theorem~\ref{thm:nonvanishing-threshold} ($2 \le n \le 9$ vs.\ $n = 10$) \\
+\texttt{JacobiObstruction} (607) & \texttt{rodrigues\_eq\_jacobi01}, \texttt{jacobi01\_orthogonality}, \texttt{jacobi\_univalent\_obstruction} & Theorem~\ref{thm:jacobi} (exact $4/(n(n+2))$ family) \\
+\bottomrule
+\end{tabular}
+\caption{Complete Lean~4.36.0 formalization in \texttt{dual-smale-multiscale} (5,571 lines including root aggregator \texttt{DualSmaleMultiscale.lean}). All 25 audited theorems depend strictly on \texttt{[propext, Classical.choice, Quot.sound]}.}
+\label{tab:lean}
+\end{table}
+
+\begin{thebibliography}{99}
+
+\bibitem{Smale1981}
+S.~Smale,
+\emph{The fundamental theorem of algebra and complexity theory},
+Bull.\ Amer.\ Math.\ Soc.\ (N.S.) \textbf{4} (1981), no.~1, 1--36.
+
+\bibitem{Ng2003}
+T.~W.~Ng,
+\emph{Smale's mean value conjecture for odd polynomials},
+J.\ Aust.\ Math.\ Soc.\ \textbf{75} (2003), no.~3, 409--411.
+
+\bibitem{DubininSugawa2009}
+V.~N.~Dubinin and T.~Sugawa,
+\emph{Dual mean value problem for complex polynomials},
+Proc.\ Japan Acad.\ Ser.\ A Math.\ Sci.\ \textbf{85} (2009), no.~9, 135--137.
+
+\bibitem{NgZhang2016}
+T.~W.~Ng and Y.~Zhang,
+\emph{Smale's mean value conjecture for finite Blaschke products},
+J.\ Anal.\ \textbf{24} (2016), no.~2, 331--345.
+
+\bibitem{Dubinin2019}
+V.~N.~Dubinin,
+\emph{Geometric versions of Schwarz's lemma and symmetrization},
+J.\ Math.\ Sci.\ \textbf{242} (2019), 501--510.
+
+\bibitem{Tyson2019}
+J.~T.~Tyson,
+\emph{Dual mean value conjecture for polynomials of degree seven},
+Comput.\ Methods Funct.\ Theory \textbf{19} (2019), 651--667.
+
+\bibitem{Tang2025}
+Y.~Tang,
+\emph{The dual Smale mean value conjecture for odd polynomials},
+arXiv:2510.16875 (2025).
+
+\bibitem{JatarNg2026}
+A.~Jatar and T.~W.~Ng,
+\emph{Improved lower bounds for the dual Smale mean value conjecture},
+arXiv:2608.27047 (2026).
+
+\bibitem{BesevicN8}
+I.~Besevic,
+\emph{A complete formal and computer-assisted proof of the Dual Smale Mean Value Conjecture for degree $n = 8$},
+Zenodo \texttt{10.5281/zenodo.24528837} (2026).
+
+\bibitem{BesevicN9}
+I.~Besevic,
+\emph{A complete formal and computer-assisted proof of the Dual Smale Mean Value Conjecture for degree $n = 9$},
+Zenodo \texttt{10.5281/zenodo.24534765} (2026).
+
+\bibitem{BesevicAllN}
+I.~Besevic,
+\emph{All-degree structural and asymptotic lower bounds for the Dual Smale Mean Value Conjecture with complete Lean 4 formalization},
+Zenodo \texttt{10.5281/zenodo.24537353} (2026).
+
+\end{thebibliography}
+
+\end{document}

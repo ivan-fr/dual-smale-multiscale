@@ -1,0 +1,45 @@
+name: CI — Lean 4 Multi-Scale All-n Proof & Paper Build
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  lean4-verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install elan & Lean 4.36.0
+        run: |
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y --default-toolchain none
+          echo "$HOME/.elan/bin" >> $GITHUB_PATH
+      - name: Fetch Mathlib cache & build DualSmaleMultiscale
+        working-directory: lean
+        run: |
+          lake exe cache get
+          lake build DualSmaleMultiscale
+      - name: Audit axioms & forbid sorry/native_decide
+        working-directory: lean
+        run: |
+          ! grep -rnE "\b(sorry|admit|native_decide|axiom )\b" DualSmaleMultiscale/ DualSmaleMultiscale.lean
+          lake env lean check_axioms.lean | tee axioms.log
+          ! grep -E "sorryAx|Lean\.ofReduceBool|Lean\.trustCompiler" axioms.log
+
+  paper-pdf:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify pure 7-bit ASCII LaTeX
+        run: |
+          python3 -c '
+          data = open("paper/dual_smale_multiscale.tex", "rb").read()
+          bad = [b for b in data if b >= 128]
+          assert not bad, f"Non-ASCII bytes found: {len(bad)}"
+          print("LaTeX is 100% pure 7-bit ASCII.")
+          '
+      - name: Install tectonic & compile PDF
+        run: |
+          curl --proto '=https' --tlsv1.2 -fsSL https://drop-sh.fullyjustified.net | sh
+          ./tectonic paper/dual_smale_multiscale.tex
+          ls -lh paper/dual_smale_multiscale.pdf
